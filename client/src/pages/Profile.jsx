@@ -9,7 +9,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { useDispatch } from "react-redux";
-import {updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess} from '../redux/user/userSlice'
+import {updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOut} from '../redux/user/userSlice'
 import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
@@ -96,6 +96,15 @@ export default function Profile() {
       dispatch(deleteUserFailure(error))
     }
   }
+
+  const handleSignout = async () => {
+    try {
+      await fetch('/api/auth/signout');
+      dispatch(signOut());
+    } catch (error) {
+      console.log(error);
+    }
+  }
  
 
   return (
@@ -157,7 +166,7 @@ export default function Profile() {
       </form>
       <div className="flex justify-between mt-3">
         <span onClick={handleDelete} className="text-red-600 cursor-pointer">Delete Account</span>
-        <span className="text-red-600 cursor-pointer">Sign out</span>
+        <span onClick={handleSignout} className="text-red-600 cursor-pointer">Sign out</span>
       </div>
       <p className="text-red-700 mt-4">{error && 'Something went wrong!!!'}</p>
       <p className="text-green-700 mt-4">{updateSuccess && 'User is Updated Successfully'}</p>
