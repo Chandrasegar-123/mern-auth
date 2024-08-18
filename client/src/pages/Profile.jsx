@@ -9,7 +9,8 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { useDispatch } from "react-redux";
-import {updateUserFailure, updateUserStart, updateUserSuccess} from '../redux/user/userSlice'
+import {updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess} from '../redux/user/userSlice'
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -20,6 +21,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (image) {
@@ -74,6 +76,24 @@ export default function Profile() {
         setUpdateSuccess(true);
     } catch(error){
       dispatch(updateUserFailure(error))
+    }
+  }
+
+  const handleDelete = async(e) => {
+    try {
+      dispatch(deleteUserStart);
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if(data.success === false){
+        dispatch(deleteUserFailure(data))
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+      navigate('/signin')
+    } catch (error) {
+      dispatch(deleteUserFailure(error))
     }
   }
  
@@ -136,7 +156,7 @@ export default function Profile() {
         </button>
       </form>
       <div className="flex justify-between mt-3">
-        <span className="text-red-600 cursor-pointer">Delete Account</span>
+        <span onClick={handleDelete} className="text-red-600 cursor-pointer">Delete Account</span>
         <span className="text-red-600 cursor-pointer">Sign out</span>
       </div>
       <p className="text-red-700 mt-4">{error && 'Something went wrong!!!'}</p>
